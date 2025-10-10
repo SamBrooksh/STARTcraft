@@ -1,8 +1,8 @@
 {
     "Bot Info" :
     {
-        "BotName"                   : "Starter Bot",
-        "Authors"                   : "David Churchill",
+        "BotName"                   : "SiyuelBot",
+        "Authors"                   : "Sam Brooks",
         "PrintInfoOnStart"          : false
     },
         

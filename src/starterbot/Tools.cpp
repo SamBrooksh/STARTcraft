@@ -148,6 +148,11 @@ int Tools::GetTotalSupply(bool inProgress)
         if (unit->isCompleted()) { continue; }
 
         // if they are not completed, then add their supply provided to the total supply
+        if (unit->isMorphing() && unit->getBuildType().supplyProvided() > 0)
+        {
+            totalSupply += unit->getBuildType().supplyProvided();
+        }
+        
         totalSupply += unit->getType().supplyProvided();
     }
 
