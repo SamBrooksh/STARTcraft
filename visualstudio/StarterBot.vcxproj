@@ -25,6 +25,7 @@
     <ClInclude Include="..\src\starterbot\ReplayParser.h" />
     <ClInclude Include="..\src\starterbot\SiyuelBot.h" />
     <ClInclude Include="..\src\starterbot\StarterBot.h" />
+    <ClInclude Include="..\src\starterbot\SUnitManager.h" />
     <ClInclude Include="..\src\starterbot\Tools.h" />
   </ItemGroup>
   <ItemGroup>
@@ -34,6 +35,7 @@
     <ClCompile Include="..\src\starterbot\ReplayParser.cpp" />
     <ClCompile Include="..\src\starterbot\SiyuelBot.cpp" />
     <ClCompile Include="..\src\starterbot\StarterBot.cpp" />
+    <ClCompile Include="..\src\starterbot\SUnitManager.cpp" />
     <ClCompile Include="..\src\starterbot\Tools.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

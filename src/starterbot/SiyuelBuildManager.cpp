@@ -13,7 +13,7 @@ void SBuildManager::SampleStart()
 		this->AddPlan(UnitPlan(BWAPI::UnitTypes::Zerg_Drone, 1+i));
 	}
 	this->AddPlan(UnitPlan(BWAPI::UnitTypes::Zerg_Spawning_Pool, 3));
-
+	AddExpand();
 }
 
 void SBuildManager::AddExpand()
@@ -23,6 +23,7 @@ void SBuildManager::AddExpand()
 
 void SBuildManager::AddZerglings()
 {
+	AddOverlord();
 	for (unsigned int i = 0; i < 6; i++)
 		this->AddPlan(UnitPlan(BWAPI::UnitTypes::Zerg_Zergling, 1));
 }
@@ -39,7 +40,7 @@ void SBuildManager::BuildNext()
 
 	BWAPI::Broodwar->drawTextScreen(BWAPI::Position(300, 310), std::to_string(unusedSupply).c_str());
 	// If we have a sufficient amount of supply, we don't need to do anything
-	if (unusedSupply >= 2 || pq_planned.top().first == BWAPI::UnitTypes::Zerg_Overlord) // This should change probably depending on state of game (and if max supply)
+	if (unusedSupply >= 2) // This should change probably depending on state of game (and if max supply)
 	{ }	//This will probably change based off the state - As well as what is already in the queue
 	else { 
 		AddOverlord();
@@ -62,13 +63,16 @@ void SBuildManager::BuildNext()
 	if (ToTrain.isBuilding())
 	{
 		const bool startedBuilding = Tools::BuildBuilding(ToTrain);
-		if (startedBuilding)
-		{
-			BWAPI::Broodwar->printf("Started Building %s", ToTrain.getName().c_str());
-			pq_planned.pop();
-			spentGas += ToTrain.gasPrice();
-			spentMins += ToTrain.mineralPrice();
-		}
+		BWAPI::Broodwar->printf("Assigned Worker to Morph into %s", ToTrain.getName().c_str());
+		BuildingStage b;
+		//b.buildPos = Tools::Get
+		b.frameIssued = BWAPI::Broodwar->getFrameCount();
+		b.worker = Tools::GetUnitOfType(BWAPI::UnitTypes::Zerg_Drone);
+		// Make sure worker is valid
+		b.toBuild = ToTrain;
+		b.unitId = b.worker->getID();
+		b.worker->build(b.toBuild, b.buildPos);
+		v_buildingsToBeBuilt.push_back(b);
 	}
 	else 
 	{
@@ -99,4 +103,30 @@ void SBuildManager::DrawBuildOrder()
 
 	BWAPI::Broodwar->drawTextScreen(BWAPI::Position(20, 20), build.c_str());
 	BWAPI::Broodwar->drawTextScreen(BWAPI::Position(400, 20), spent.c_str());
+}
+
+void SBuildManager::StructureStarted(BWAPI::Unit unit)
+{
+	if (!unit->getType().isBuilding())
+		return;
+	BuildingStage b;
+	// Need to find the structure in the v_buildings vec
+	for (auto stage : v_buildingsToBeBuilt)
+	{
+		if (stage.unitId == unit->getID())
+		{
+			b = stage;
+			break;
+		}
+	}
+	if (false)	//Do a check here if b exists
+		return;
+
+	spentGas += b.toBuild.gasPrice();
+	spentMins += b.toBuild.mineralPrice();
+	pq_planned.pop();
+}
+
+void SBuildManager::WorkerKilled(BWAPI::Unit unit)
+{
 }

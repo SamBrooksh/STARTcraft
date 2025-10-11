@@ -8,6 +8,7 @@
     <ClCompile Include="..\src\starterbot\Tools.cpp" />
     <ClCompile Include="..\src\starterbot\SiyuelBot.cpp" />
     <ClCompile Include="..\src\starterbot\SiyuelBuildManager.cpp" />
+    <ClCompile Include="..\src\starterbot\SUnitManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\starterbot\Grid.hpp" />
@@ -17,5 +18,6 @@
     <ClInclude Include="..\src\starterbot\Tools.h" />
     <ClInclude Include="..\src\starterbot\SiyuelBuildManager.h" />
     <ClInclude Include="..\src\starterbot\SiyuelBot.h" />
+    <ClInclude Include="..\src\starterbot\SUnitManager.h" />
   </ItemGroup>
 </Project>

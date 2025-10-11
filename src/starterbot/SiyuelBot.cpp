@@ -27,7 +27,7 @@ void SiyuelBot::onFrame()
     b_buildManage.DrawBuildOrder();
     // Draw unit health bars, which brood war unfortunately does not do
     Tools::DrawUnitHealthBars();
-
+    s_unitManage.GatherAndAttack(); //Should change to a general one
 }
 
 
@@ -67,14 +67,18 @@ void SiyuelBot::onEnd(bool isWinner)
 // Called whenever a unit is destroyed, with a pointer to the unit
 void SiyuelBot::onUnitDestroy(BWAPI::Unit unit)
 {
-
+    s_unitManage.RemoveUnitFromUnitsets(unit);
+    if (unit->getType().isWorker())
+        b_buildManage.WorkerKilled(unit);
 }
 
 // Called whenever a unit is morphed, with a pointer to the unit
 // Zerg units morph when they turn into other units
 void SiyuelBot::onUnitMorph(BWAPI::Unit unit)
 {
-
+    if (unit->isMorphing())
+        b_buildManage.StructureStarted(unit);
+    
 }
 
 // Called whenever a text is sent to the game by a user
@@ -91,13 +95,13 @@ void SiyuelBot::onSendText(std::string text)
 // so this will trigger when you issue the build command for most units
 void SiyuelBot::onUnitCreate(BWAPI::Unit unit)
 {
-
+    
 }
 
 // Called whenever a unit finished construction, with a pointer to the unit
 void SiyuelBot::onUnitComplete(BWAPI::Unit unit)
 {
-
+    s_unitManage.PlaceUnitCreated(unit);
 }
 
 // Called whenever a unit appears, with a pointer to the destroyed unit
