@@ -67,6 +67,9 @@ void SBuildManager::BuildNext()
 		BuildingStage b;
 		//b.buildPos = Tools::Get
 		b.frameIssued = BWAPI::Broodwar->getFrameCount();
+		// Should change this to have the Unit Manager give the drone and deal with it
+
+		//
 		b.worker = Tools::GetUnitOfType(BWAPI::UnitTypes::Zerg_Drone);
 		// Make sure worker is valid
 		b.toBuild = ToTrain;

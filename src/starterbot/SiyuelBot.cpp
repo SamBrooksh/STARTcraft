@@ -6,11 +6,14 @@ void SiyuelBot::onStart()
     BWAPI::Broodwar->setLocalSpeed(10);
     BWAPI::Broodwar->setFrameSkip(0);
 
+
+    b_buildManage.s_UnitManage = &s_unitManage;
     // Enable the flag that tells BWAPI top let users enter input while bot plays
     BWAPI::Broodwar->enableFlag(BWAPI::Flag::UserInput);
     // Call MapTools OnStart
     m_mapTools.onStart();
     b_buildManage.SampleStart();
+    s_unitManage.onStart();
 }
 
 
@@ -21,17 +24,18 @@ void SiyuelBot::onFrame()
     m_mapTools.onFrame();
 
     // Send our idle workers to mine minerals so they don't just stand there
-    sendIdleWorkersToMinerals();
+    //sendIdleWorkersToMinerals();
     
     b_buildManage.BuildNext();
     b_buildManage.DrawBuildOrder();
     // Draw unit health bars, which brood war unfortunately does not do
     Tools::DrawUnitHealthBars();
     s_unitManage.GatherAndAttack(); //Should change to a general one
+    s_unitManage.onFrame();
 }
 
 
-// Send our idle workers to mine minerals so they don't just stand there
+// Send our idle workers to mine minerals so they don't just stand there    - Eventually don't use this
 void SiyuelBot::sendIdleWorkersToMinerals()
 {
     // Let's send all of our starting workers to the closest mineral to them
