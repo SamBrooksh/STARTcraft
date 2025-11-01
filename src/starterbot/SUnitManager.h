@@ -3,6 +3,7 @@
 #include <BWAPI.h>
 #include <Filter.h>
 #include <vector>
+#include "Tools.h"
 
 class SUnitManager {
 	BWAPI::Unitset Scouting;	// I'll probably eventually change these to be seperate classes
@@ -23,7 +24,8 @@ class SUnitManager {
 	// Eventually will need to have a way to get reference to state of game and use it in the sorting
 
 public:
-	BWAPI::Unit GetWorkerNearPosition(BWAPI::Position);
+	BWAPI::Unit GetWorkerNearPosition(BWAPI::Position, bool=true);
+	BWAPI::Unit GetWorkerNearPosition(BWAPI::TilePosition, bool=true);	//Have this just call the above after converting
 	BWAPI::Unit GetScout();						// Adds unit to Scouting - first search the main fight, then if have overlord speed - one from here - then a worker otherwise
 	void RemoveUnitFromUnitsets(BWAPI::Unit);	// Should be able to remove from any group - including MiningTracker
 

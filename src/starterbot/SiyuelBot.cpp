@@ -19,7 +19,11 @@ void SiyuelBot::onStart()
 
 void SiyuelBot::onFrame()
 {
-
+    BWAPI::Error e = BWAPI::Broodwar->getLastError();
+    if (e != BWAPI::Errors::None)
+    {
+        std::cout << e << std::endl;
+    }
     // Update our MapTools information
     m_mapTools.onFrame();
 

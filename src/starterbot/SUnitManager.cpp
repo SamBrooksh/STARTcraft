@@ -66,10 +66,10 @@ void SUnitManager::SortUnsorted()
 					rw.Workers.insert(unit);
 					std::cout << "Added "<< unit <<" to Mining Tracker ("<<rw.Resource<<"): " <<rw.Workers.size() << std::endl;
 					Unsorted.erase(unit);
-					if (rw.Workers.contains(unit) && !Unsorted.contains(unit))
+					/**if (rw.Workers.contains(unit) && !Unsorted.contains(unit))
 					{
 						std::cout << "Works as wanted" << std::endl;
-					}
+					}*/
 					break;
 				}
 			}
@@ -84,7 +84,7 @@ void SUnitManager::MicroWorkerMining(BWAPI::Unit worker, BWAPI::Unit resource)
 	{
 		
 	}
-	else if (worker->isIdle())	//I want to eventually make it speed mining
+	else if (worker->isIdle() && worker->isCompleted())	//I want to eventually make it speed mining
 	{
 		worker->gather(resource);
 		std::cout << "Ordered Mining" << std::endl;
@@ -218,9 +218,19 @@ void SUnitManager::onFrame()
 }
 
 
-BWAPI::Unit SUnitManager::GetWorkerNearPosition(BWAPI::Position)
+BWAPI::Unit SUnitManager::GetWorkerNearPosition(BWAPI::Position p, bool remove)
 {
-	return BWAPI::Unit();
+	BWAPI::Unit u = Tools::GetClosestUnitTo(p, Workers);
+	if (remove)
+	{
+		RemoveUnitFromUnitsets(u);
+	}
+	return u;
+}
+
+BWAPI::Unit SUnitManager::GetWorkerNearPosition(BWAPI::TilePosition t, bool remove)
+{
+	return GetWorkerNearPosition(BWAPI::Position(t), remove);
 }
 
 BWAPI::Unit SUnitManager::GetScout()
@@ -231,25 +241,44 @@ BWAPI::Unit SUnitManager::GetScout()
 void SUnitManager::RemoveUnitFromUnitsets(BWAPI::Unit unit)
 {
 	if (Scouting.contains(unit))
+	{
 		Scouting.erase(unit);
+		std::cout << "Removed Unit from Scouting" << std::endl;
+	}
 
 	if (MainFight.contains(unit))
+	{
 		MainFight.erase(unit);
+		std::cout << "Removed Unit from MainFight" << std::endl;
+	}
 	
 	if (Workers.contains(unit))
+	{
 		Workers.erase(unit);
+		std::cout << "Removed Unit from Workers" << std::endl;
+	}
 	
 	if (Harass.contains(unit))
+	{
 		Harass.erase(unit);
+		std::cout << "Removed Unit from Harass" << std::endl;
+	}
 	
-	for (auto rw : MiningTracker)
+	for (auto& rw : MiningTracker)
 	{
 		if (rw.Workers.contains(unit))
-			rw.Workers.erase(unit);
+		{
+			size_t l = rw.Workers.size();
+			rw.Workers.erase(unit);			//This is not removing it properly
+			std::cout << "Removed Unit from MiningTracker" << std::endl;
+			if (l == rw.Workers.size())
+			{
+				std::cout << "Didn't remove it..." << std::endl;
+			}
+		}
 		else if (rw.Resource == unit)
 		{
 			ResourceLost(unit);
 		}
 	}
-	std::cout << "Removed Unit from UnitSet" << std::endl;
 }

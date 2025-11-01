@@ -23,7 +23,7 @@ void SBuildManager::AddExpand()
 
 void SBuildManager::AddZerglings()
 {
-	AddOverlord();
+	//AddOverlord();
 	for (unsigned int i = 0; i < 6; i++)
 		this->AddPlan(UnitPlan(BWAPI::UnitTypes::Zerg_Zergling, 1));
 }
@@ -63,19 +63,24 @@ void SBuildManager::BuildNext()
 	if (ToTrain.isBuilding())
 	{
 		const bool startedBuilding = Tools::BuildBuilding(ToTrain);
-		BWAPI::Broodwar->printf("Assigned Worker to Morph into %s", ToTrain.getName().c_str());
 		BuildingStage b;
 		//b.buildPos = Tools::Get
 		b.frameIssued = BWAPI::Broodwar->getFrameCount();
 		// Should change this to have the Unit Manager give the drone and deal with it
-
-		//
-		b.worker = Tools::GetUnitOfType(BWAPI::UnitTypes::Zerg_Drone);
+		b.worker = s_UnitManage->GetWorkerNearPosition(b.buildPos);
+		if (!b.worker->exists())
+			return;
+		// Prev was - b.worker = Tools::GetUnitOfType(BWAPI::UnitTypes::Zerg_Drone);
+		BWAPI::Broodwar->printf("Assigned Worker(%d) to Morph into %s", b.worker->getID(), ToTrain.getName().c_str());	// This does get spammed still... it may be smarter to request to have the unit manager control where the buildings are built and just give the details though...
 		// Make sure worker is valid
+		
 		b.toBuild = ToTrain;
 		b.unitId = b.worker->getID();
 		b.worker->build(b.toBuild, b.buildPos);
-		v_buildingsToBeBuilt.push_back(b);
+		v_buildingsToBeBuilt.push_back(b); 
+		spentGas += b.toBuild.gasPrice();
+		spentMins += b.toBuild.mineralPrice();
+		pq_planned.pop();
 	}
 	else 
 	{
@@ -124,10 +129,6 @@ void SBuildManager::StructureStarted(BWAPI::Unit unit)
 	}
 	if (false)	//Do a check here if b exists
 		return;
-
-	spentGas += b.toBuild.gasPrice();
-	spentMins += b.toBuild.mineralPrice();
-	pq_planned.pop();
 }
 
 void SBuildManager::WorkerKilled(BWAPI::Unit unit)
