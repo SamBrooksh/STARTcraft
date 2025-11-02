@@ -79,7 +79,7 @@ void SBuildManager::BuildNext()
 		int maxBuildRange = 64;
 		bool buildingOnCreep = b.toBuild.requiresCreep();
 
-		b.buildPos = BWAPI::Broodwar->getBuildLocation(b.toBuild, desiredPos, 64, buildingOnCreep);
+		b.buildPos = BWAPI::Broodwar->getBuildLocation(b.toBuild, desiredPos, 64, buildingOnCreep);	// need to make this more flexible...
 		b.worker->build(b.toBuild, b.buildPos);
 		v_buildingsToBeBuilt.push_back(b); 
 		spentGas += b.toBuild.gasPrice();
