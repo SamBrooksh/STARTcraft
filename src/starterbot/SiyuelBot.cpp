@@ -5,6 +5,7 @@ void SiyuelBot::onStart()
     // Set our BWAPI options here    
     BWAPI::Broodwar->setLocalSpeed(10);
     BWAPI::Broodwar->setFrameSkip(0);
+    
 
 
     b_buildManage.s_UnitManage = &s_unitManage;
@@ -22,7 +23,7 @@ void SiyuelBot::onFrame()
     BWAPI::Error e = BWAPI::Broodwar->getLastError();
     if (e != BWAPI::Errors::None)
     {
-        std::cout << e << std::endl;
+        //std::cout << e << std::endl;
     }
     // Update our MapTools information
     m_mapTools.onFrame();
@@ -34,6 +35,7 @@ void SiyuelBot::onFrame()
     b_buildManage.DrawBuildOrder();
     // Draw unit health bars, which brood war unfortunately does not do
     Tools::DrawUnitHealthBars();
+    drawDebugInformation();
     s_unitManage.GatherAndAttack(); //Should change to a general one
     s_unitManage.onFrame();
 }
@@ -64,6 +66,10 @@ void SiyuelBot::drawDebugInformation()
     //BWAPI::Broodwar->drawTextScreen(BWAPI::Position(10, 10), "Hello, World!\n");
     Tools::DrawUnitCommands();
     Tools::DrawUnitBoundingBoxes();
+    for (auto& unit : BWAPI::Broodwar->self()->getUnits())
+    {
+        BWAPI::Broodwar->drawText(BWAPI::CoordinateType::Map, (unit->getLeft() + unit->getRight()) / 2, (unit->getTop() + unit->getBottom()) / 2, "%d", unit->getID());
+    }
 }
 
 // Called whenever the game ends and tells you if you won or not

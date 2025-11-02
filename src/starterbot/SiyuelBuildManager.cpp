@@ -23,7 +23,7 @@ void SBuildManager::AddExpand()
 
 void SBuildManager::AddZerglings()
 {
-	//AddOverlord();
+	AddOverlord();
 	for (unsigned int i = 0; i < 6; i++)
 		this->AddPlan(UnitPlan(BWAPI::UnitTypes::Zerg_Zergling, 1));
 }
@@ -62,9 +62,8 @@ void SBuildManager::BuildNext()
 	// Need to add this as a task probably to be done in case of errors
 	if (ToTrain.isBuilding())
 	{
-		const bool startedBuilding = Tools::BuildBuilding(ToTrain);
+		//const bool startedBuilding = Tools::BuildBuilding(ToTrain);
 		BuildingStage b;
-		//b.buildPos = Tools::Get
 		b.frameIssued = BWAPI::Broodwar->getFrameCount();
 		// Should change this to have the Unit Manager give the drone and deal with it
 		b.worker = s_UnitManage->GetWorkerNearPosition(b.buildPos);
@@ -76,6 +75,11 @@ void SBuildManager::BuildNext()
 		
 		b.toBuild = ToTrain;
 		b.unitId = b.worker->getID();
+		BWAPI::TilePosition desiredPos = BWAPI::Broodwar->self()->getStartLocation();
+		int maxBuildRange = 64;
+		bool buildingOnCreep = b.toBuild.requiresCreep();
+
+		b.buildPos = BWAPI::Broodwar->getBuildLocation(b.toBuild, desiredPos, 64, buildingOnCreep);
 		b.worker->build(b.toBuild, b.buildPos);
 		v_buildingsToBeBuilt.push_back(b); 
 		spentGas += b.toBuild.gasPrice();

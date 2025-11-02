@@ -64,7 +64,7 @@ void SUnitManager::SortUnsorted()
 				{
 					
 					rw.Workers.insert(unit);
-					std::cout << "Added "<< unit <<" to Mining Tracker ("<<rw.Resource<<"): " <<rw.Workers.size() << std::endl;
+					std::cout << "Added "<< unit <<" to Mining Tracker ("<<rw.Resource->getID()<<"): " <<rw.Workers.size() << std::endl;
 					Unsorted.erase(unit);
 					/**if (rw.Workers.contains(unit) && !Unsorted.contains(unit))
 					{
@@ -87,7 +87,7 @@ void SUnitManager::MicroWorkerMining(BWAPI::Unit worker, BWAPI::Unit resource)
 	else if (worker->isIdle() && worker->isCompleted())	//I want to eventually make it speed mining
 	{
 		worker->gather(resource);
-		std::cout << "Ordered Mining" << std::endl;
+		std::cout << "Ordered Mining ("<< worker->getID()<<") : ("<< resource->getID()<<")" << std::endl;
 	}
 }
 
@@ -98,12 +98,12 @@ void SUnitManager::Micro()
 	for (auto rw : MiningTracker)
 	{
 		//Draw on the minerals?
-		BWAPI::Broodwar->drawText(BWAPI::CoordinateType::Map, rw.Resource->getLeft()-15, rw.Resource->getBottom()-15, "R: %d", count);
+		BWAPI::Broodwar->drawText(BWAPI::CoordinateType::Map, rw.Resource->getLeft()-15, rw.Resource->getBottom()-15, "R: %d, WC: %d", count, rw.Workers.size());
 		int wCount = 0;
 		for (auto worker : rw.Workers)
 		{
 			//if (worker->getLastCommandFrame() >= BFrame) { continue; }	// Will probably need this in all micro stuff...
-			BWAPI::Broodwar->drawText(BWAPI::CoordinateType::Map, worker->getLeft() - 45, worker->getBottom() - 30, "%d->%d", wCount, count);
+			BWAPI::Broodwar->drawText(BWAPI::CoordinateType::Map, worker->getLeft(), worker->getTop(), "w%d->r%d", wCount, count);
 
 			MicroWorkerMining(worker, rw.Resource);
 			wCount += 1;
@@ -116,9 +116,9 @@ void SUnitManager::listResourceWorkers()
 {
 	for (auto rw : MiningTracker)
 	{
-		std::cout << "Resource: "<< rw.Resource <<std::endl;
+		std::cout << "Resource: "<< rw.Resource->getID() <<std::endl;
 		for (auto w : rw.Workers)
-			std::cout << "\tWorker:" << w << std::endl;
+			std::cout << "\tWorker:" << w->getID() << std::endl;
 	}
 }
 
@@ -243,38 +243,40 @@ void SUnitManager::RemoveUnitFromUnitsets(BWAPI::Unit unit)
 	if (Scouting.contains(unit))
 	{
 		Scouting.erase(unit);
-		std::cout << "Removed Unit from Scouting" << std::endl;
+		std::cout << "Removed " << unit->getID() << " from Scouting" << std::endl;
 	}
 
 	if (MainFight.contains(unit))
 	{
 		MainFight.erase(unit);
-		std::cout << "Removed Unit from MainFight" << std::endl;
+		std::cout << "Removed " << unit->getID() << " from MainFight" << std::endl;
 	}
 	
 	if (Workers.contains(unit))
 	{
 		Workers.erase(unit);
-		std::cout << "Removed Unit from Workers" << std::endl;
+		std::cout << "Removed "<< unit->getID() <<" from Workers" << std::endl;
 	}
 	
 	if (Harass.contains(unit))
 	{
 		Harass.erase(unit);
-		std::cout << "Removed Unit from Harass" << std::endl;
+		std::cout << "Removed " << unit->getID() << " from Harass" << std::endl;
 	}
 	
 	for (auto& rw : MiningTracker)
 	{
+		
+		std::cout << "Min: " << rw.Resource << std::endl;
+		for (auto& w : rw.Workers)
+			std::cout << "\tWorker: " << w->getID() << std::endl;
 		if (rw.Workers.contains(unit))
 		{
-			size_t l = rw.Workers.size();
-			rw.Workers.erase(unit);			//This is not removing it properly
-			std::cout << "Removed Unit from MiningTracker" << std::endl;
-			if (l == rw.Workers.size())
-			{
-				std::cout << "Didn't remove it..." << std::endl;
-			}
+			size_t l = rw.Workers.erase(unit);			//This is not removing it properly
+			std::cout << "Removed " << unit->getID() << " from MiningTracker" << std::endl;
+			std::cout << "After Min: " << rw.Resource << std::endl;
+			for (auto& w : rw.Workers)
+				std::cout << "\tWorker: " << w->getID() << std::endl;
 		}
 		else if (rw.Resource == unit)
 		{
