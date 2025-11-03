@@ -6,8 +6,6 @@ void SiyuelBot::onStart()
     BWAPI::Broodwar->setLocalSpeed(10);
     BWAPI::Broodwar->setFrameSkip(0);
     
-
-
     b_buildManage.s_UnitManage = &s_unitManage;
     // Enable the flag that tells BWAPI top let users enter input while bot plays
     BWAPI::Broodwar->enableFlag(BWAPI::Flag::UserInput);
@@ -20,22 +18,22 @@ void SiyuelBot::onStart()
 
 void SiyuelBot::onFrame()
 {
-    BWAPI::Error e = BWAPI::Broodwar->getLastError();
-    if (e != BWAPI::Errors::None)
+    if (printErrors)
     {
-        //std::cout << e << std::endl;
+        showErrors();
     }
+    if (displayDebug)
+    {
+        drawDebugInformation();
+    }
+
     // Update our MapTools information
     m_mapTools.onFrame();
-
-    // Send our idle workers to mine minerals so they don't just stand there
-    //sendIdleWorkersToMinerals();
     
-    b_buildManage.BuildNext();
-    b_buildManage.DrawBuildOrder();
+    b_buildManage.onFrame();
     // Draw unit health bars, which brood war unfortunately does not do
     Tools::DrawUnitHealthBars();
-    drawDebugInformation();
+    
     s_unitManage.GatherAndAttack(); //Should change to a general one
     s_unitManage.onFrame();
 }
@@ -102,7 +100,33 @@ void SiyuelBot::onSendText(std::string text)
     {
         m_mapTools.toggleDraw();
     }
+    else if (text == "/build")
+    {
+        b_buildManage.toggleDebug();
+    }
+    else if (text == "/micro")
+    {
+        s_unitManage.toggleDebug();
+    }
+    else if (text == "/errors")
+    {
+        printErrors = !printErrors;
+    }
+    else if (text == "/debug")
+    {
+        displayDebug = !displayDebug;
+    }
 }
+
+void SiyuelBot::showErrors()
+{
+    BWAPI::Error e = BWAPI::Broodwar->getLastError();
+    if (e != BWAPI::Errors::None)
+    {
+        std::cout << e << std::endl;
+    }
+}
+
 
 // Called whenever a unit is created, with a pointer to the destroyed unit
 // Units are created in buildings like barracks before they are visible, 

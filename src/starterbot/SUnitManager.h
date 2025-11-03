@@ -22,8 +22,11 @@ class SUnitManager {
 	std::vector<ResourceWorkers> MiningTracker;
 
 	// Eventually will need to have a way to get reference to state of game and use it in the sorting
+	bool showDebug = false;
 
 public:
+	void toggleDebug();
+
 	BWAPI::Unit GetWorkerNearPosition(BWAPI::Position, bool remove=true);
 	BWAPI::Unit GetWorkerNearPosition(BWAPI::TilePosition, bool remove=true);	//Have this just call the above after converting
 	BWAPI::Unit GetScout();						// Adds unit to Scouting - first search the main fight, then if have overlord speed - one from here - then a worker otherwise

@@ -35,10 +35,11 @@ class SBuildManager {
 	
 	// BuildOrder* Planner;	// Eventually have a BuildOrder
 	// Need probably a read from file to add to planned
-
-
+	bool showDebug = false;
 
 public:
+	void toggleDebug();
+
 	SUnitManager* s_UnitManage;
 	//Just starter stuff - eventually something like this would be 
 	void AddPlan(const UnitPlan);
@@ -52,4 +53,6 @@ public:
 	void StructureStarted(BWAPI::Unit);
 	void WorkerKilled(BWAPI::Unit);
 	void StructureDestroyed();	// If a tech structure is destroyed - need to know
+
+	void onFrame();
 };

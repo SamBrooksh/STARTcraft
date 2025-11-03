@@ -24,7 +24,8 @@ void SUnitManager::GatherAndAttack()
 			}
 		}
 		MainFight.attack(Target);
-		std::cout << "Attacking with units!" << std::endl;
+		if (showDebug)
+			std::cout << "Attacking with units!" << std::endl;
 	}
 }
 
@@ -64,12 +65,9 @@ void SUnitManager::SortUnsorted()
 				{
 					
 					rw.Workers.insert(unit);
-					std::cout << "Added "<< unit <<" to Mining Tracker ("<<rw.Resource->getID()<<"): " <<rw.Workers.size() << std::endl;
+					if (showDebug)
+						std::cout << "Added "<< unit <<" to Mining Tracker ("<<rw.Resource->getID()<<"): " <<rw.Workers.size() << std::endl;
 					Unsorted.erase(unit);
-					/**if (rw.Workers.contains(unit) && !Unsorted.contains(unit))
-					{
-						std::cout << "Works as wanted" << std::endl;
-					}*/
 					break;
 				}
 			}
@@ -87,7 +85,8 @@ void SUnitManager::MicroWorkerMining(BWAPI::Unit worker, BWAPI::Unit resource)
 	else if (worker->isIdle() && worker->isCompleted())	//I want to eventually make it speed mining
 	{
 		worker->gather(resource);
-		std::cout << "Ordered Mining ("<< worker->getID()<<") : ("<< resource->getID()<<")" << std::endl;
+		if (showDebug)
+			std::cout << "Ordered Mining ("<< worker->getID()<<") : ("<< resource->getID()<<")" << std::endl;
 	}
 }
 
@@ -98,12 +97,14 @@ void SUnitManager::Micro()
 	for (auto rw : MiningTracker)
 	{
 		//Draw on the minerals?
-		BWAPI::Broodwar->drawText(BWAPI::CoordinateType::Map, rw.Resource->getLeft()-15, rw.Resource->getBottom()-15, "R: %d, WC: %d", count, rw.Workers.size());
+		if (showDebug)
+			BWAPI::Broodwar->drawText(BWAPI::CoordinateType::Map, rw.Resource->getLeft()-15, rw.Resource->getBottom()-15, "R: %d, WC: %d", count, rw.Workers.size());
 		int wCount = 0;
 		for (auto worker : rw.Workers)
 		{
 			//if (worker->getLastCommandFrame() >= BFrame) { continue; }	// Will probably need this in all micro stuff...
-			BWAPI::Broodwar->drawText(BWAPI::CoordinateType::Map, worker->getLeft(), worker->getTop(), "w%d->r%d", wCount, count);
+			if (showDebug)
+				BWAPI::Broodwar->drawText(BWAPI::CoordinateType::Map, worker->getLeft(), worker->getTop(), "w%d->r%d", wCount, count);
 
 			MicroWorkerMining(worker, rw.Resource);
 			wCount += 1;
@@ -144,13 +145,15 @@ void SUnitManager::AddResourcesToMiningTracker()
 	for (auto& u : Hatcheries)
 	{
 		BWAPI::Unitset mins = BWAPI::Broodwar->getUnitsInRadius(u->getPosition(), 256, BWAPI::Filter::IsMineralField);	//This could be way to large of a search...
-		std::cout << "Resources Found: " << mins.size() << std::endl;
+		if (showDebug)
+			std::cout << "Resources Found: " << mins.size() << std::endl;
 		for (auto& min : mins)
 		{
 			if (!ResourceInMiningTracker(min))
 			{
 				MiningTracker.push_back(ResourceWorkers(min, BWAPI::Unitset()));
-				std::cout << "Added resource to Mining Tracker" << std::endl;
+				if (showDebug)
+					std::cout << "Added resource to Mining Tracker" << std::endl;
 			}
 		}
 	}
@@ -183,7 +186,8 @@ void SUnitManager::ResourceLost(BWAPI::Unit FieldLost)
 			Unsorted.insert(worker);
 		
 		MiningTracker.erase(MiningTracker.begin() + index);	// I hope this doesn't leak mem
-		std::cout << "ResourceLost" << std::endl;
+		if (showDebug)
+			std::cout << "ResourceLost" << std::endl;
 	}
 	else {
 		//Should mark error of some way...
@@ -202,7 +206,8 @@ void SUnitManager::onStart()
 			break;
 		case BWAPI::UnitTypes::Zerg_Hatchery:
 			Hatcheries.insert(unit);
-			std::cout << "Added Hatch" << std::endl;
+			if (showDebug)
+				std::cout << "Added Hatch" << std::endl;
 			break;
 		}
 	}
@@ -213,10 +218,15 @@ void SUnitManager::onFrame()
 {
 	Micro();
 	SortUnsorted();	//Maybe do this every 100 frames or something
-	if (BWAPI::Broodwar->getFrameCount() % 1000 == 0)
+	if (BWAPI::Broodwar->getFrameCount() % 1000 == 0 && showDebug)
 		listResourceWorkers();
 }
 
+
+void SUnitManager::toggleDebug()
+{
+	showDebug = !showDebug;
+}
 
 BWAPI::Unit SUnitManager::GetWorkerNearPosition(BWAPI::Position p, bool remove)
 {
@@ -243,40 +253,49 @@ void SUnitManager::RemoveUnitFromUnitsets(BWAPI::Unit unit)
 	if (Scouting.contains(unit))
 	{
 		Scouting.erase(unit);
-		std::cout << "Removed " << unit->getID() << " from Scouting" << std::endl;
+		if (showDebug)
+			std::cout << "Removed " << unit->getID() << " from Scouting" << std::endl;
 	}
 
 	if (MainFight.contains(unit))
 	{
 		MainFight.erase(unit);
-		std::cout << "Removed " << unit->getID() << " from MainFight" << std::endl;
+		if (showDebug)
+			std::cout << "Removed " << unit->getID() << " from MainFight" << std::endl;
 	}
 	
 	if (Workers.contains(unit))
 	{
 		Workers.erase(unit);
-		std::cout << "Removed "<< unit->getID() <<" from Workers" << std::endl;
+		if (showDebug)
+			std::cout << "Removed "<< unit->getID() <<" from Workers" << std::endl;
 	}
 	
 	if (Harass.contains(unit))
 	{
 		Harass.erase(unit);
-		std::cout << "Removed " << unit->getID() << " from Harass" << std::endl;
+		if (showDebug)
+			std::cout << "Removed " << unit->getID() << " from Harass" << std::endl;
 	}
 	
 	for (auto& rw : MiningTracker)
 	{
-		
-		std::cout << "Min: " << rw.Resource << std::endl;
-		for (auto& w : rw.Workers)
-			std::cout << "\tWorker: " << w->getID() << std::endl;
+		if (showDebug)
+		{
+			std::cout << "Min: " << rw.Resource << std::endl;
+			for (auto& w : rw.Workers)
+				std::cout << "\tWorker: " << w->getID() << std::endl;
+		}
 		if (rw.Workers.contains(unit))
 		{
 			size_t l = rw.Workers.erase(unit);			//This is not removing it properly
-			std::cout << "Removed " << unit->getID() << " from MiningTracker" << std::endl;
-			std::cout << "After Min: " << rw.Resource << std::endl;
-			for (auto& w : rw.Workers)
-				std::cout << "\tWorker: " << w->getID() << std::endl;
+			if (showDebug)
+			{
+				std::cout << "Removed " << unit->getID() << " from MiningTracker" << std::endl;
+				std::cout << "After Min: " << rw.Resource << std::endl;
+				for (auto& w : rw.Workers)
+					std::cout << "\tWorker: " << w->getID() << std::endl;
+			}
 		}
 		else if (rw.Resource == unit)
 		{

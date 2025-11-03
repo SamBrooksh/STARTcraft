@@ -1,5 +1,10 @@
 #include "SiyuelBuildManager.h"
 
+void SBuildManager::toggleDebug()
+{
+	showDebug = !showDebug;
+}
+
 void SBuildManager::AddPlan(UnitPlan up)
 {
 	// Will probably slowly increase the id of the group - so this should probably have count of to place as well
@@ -38,7 +43,8 @@ void SBuildManager::BuildNext()
 	//If close to supply block
 	const int unusedSupply = Tools::GetTotalSupply(true) - BWAPI::Broodwar->self()->supplyUsed();
 
-	BWAPI::Broodwar->drawTextScreen(BWAPI::Position(300, 310), std::to_string(unusedSupply).c_str());
+	if (showDebug)
+		BWAPI::Broodwar->drawTextScreen(BWAPI::Position(300, 310), std::to_string(unusedSupply).c_str());
 	// If we have a sufficient amount of supply, we don't need to do anything
 	if (unusedSupply >= 2) // This should change probably depending on state of game (and if max supply)
 	{ }	//This will probably change based off the state - As well as what is already in the queue
@@ -70,7 +76,8 @@ void SBuildManager::BuildNext()
 		if (!b.worker->exists())
 			return;
 		// Prev was - b.worker = Tools::GetUnitOfType(BWAPI::UnitTypes::Zerg_Drone);
-		BWAPI::Broodwar->printf("Assigned Worker(%d) to Morph into %s", b.worker->getID(), ToTrain.getName().c_str());	// This does get spammed still... it may be smarter to request to have the unit manager control where the buildings are built and just give the details though...
+		if (showDebug)
+			BWAPI::Broodwar->printf("Assigned Worker(%d) to Morph into %s", b.worker->getID(), ToTrain.getName().c_str());	// it may be smarter to request to have the unit manager control where the buildings are built and just give the details though...
 		// Make sure worker is valid
 		
 		b.toBuild = ToTrain;
@@ -137,4 +144,11 @@ void SBuildManager::StructureStarted(BWAPI::Unit unit)
 
 void SBuildManager::WorkerKilled(BWAPI::Unit unit)
 {
+}
+
+void SBuildManager::onFrame()
+{
+	BuildNext();
+	if (showDebug)
+		DrawBuildOrder();
 }

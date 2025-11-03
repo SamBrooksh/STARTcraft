@@ -11,7 +11,8 @@ class SiyuelBot {
 	SBuildManager b_buildManage;
 	SUnitManager s_unitManage;
 	
-
+	bool printErrors = false;
+	bool displayDebug = false;
 	/*
 	* Do Zerg AI for now
 	* TODO: Build order manager
@@ -43,4 +44,5 @@ public:
 	void onUnitRenegade(BWAPI::Unit unit);
 	void sendIdleWorkersToMinerals();
 	void drawDebugInformation();
+	void showErrors();
 };
