@@ -7,12 +7,15 @@ void SiyuelBot::onStart()
     BWAPI::Broodwar->setFrameSkip(0);
     
     b_buildManage.s_UnitManage = &s_unitManage;
+    s_scoutManage.m_tools = &m_mapTools;
     // Enable the flag that tells BWAPI top let users enter input while bot plays
     BWAPI::Broodwar->enableFlag(BWAPI::Flag::UserInput);
     // Call MapTools OnStart
     m_mapTools.onStart();
     b_buildManage.SampleStart();
     s_unitManage.onStart();
+
+    s_scoutManage.onStart();
 }
 
 
@@ -29,13 +32,13 @@ void SiyuelBot::onFrame()
 
     // Update our MapTools information
     m_mapTools.onFrame();
-    
     b_buildManage.onFrame();
     // Draw unit health bars, which brood war unfortunately does not do
     Tools::DrawUnitHealthBars();
     
-    s_unitManage.GatherAndAttack(); //Should change to a general one
     s_unitManage.onFrame();
+
+    s_scoutManage.onFrame();
 }
 
 

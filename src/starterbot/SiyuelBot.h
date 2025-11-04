@@ -4,13 +4,15 @@
 #include "SiyuelBuildManager.h"
 #include "MapTools.h"
 #include "SUnitManager.h"
+#include "SScoutManager.h"
 
 class SiyuelBot {
 
 	MapTools m_mapTools;
 	SBuildManager b_buildManage;
 	SUnitManager s_unitManage;
-	
+	SScoutManager s_scoutManage;
+
 	bool printErrors = false;
 	bool displayDebug = false;
 	/*
