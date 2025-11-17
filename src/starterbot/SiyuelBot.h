@@ -5,6 +5,7 @@
 #include "MapTools.h"
 #include "SUnitManager.h"
 #include "SScoutManager.h"
+#include "algorithm"
 
 class SiyuelBot {
 
