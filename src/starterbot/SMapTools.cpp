@@ -7,8 +7,11 @@ void SMapTools::onStart()
     m_walkable = Grid<int>(m_width, m_height, 1);
     m_buildable = Grid<int>(m_width, m_height, 0);
     m_depotBuildable = Grid<int>(m_width, m_height, 0);
+	m_depotSoonBuildable = Grid<int>(m_width, m_height, 0);
     m_lastSeen = Grid<int>(m_width, m_height, 0);
     m_tileType = Grid<char>(m_width, m_height, 0);
+
+	bool b_miningField = false;
 
     // Set the boolean grid data from the Map
 	// Change this to handle different uses
@@ -18,14 +21,15 @@ void SMapTools::onStart()
         {
             m_buildable.set(x, y, canBuild(x, y));
             m_depotBuildable.set(x, y, canBuild(x, y));
+			m_depotSoonBuildable.set(x, y, canBuild(x, y));
             m_walkable.set(x, y, m_buildable.get(x, y) || canWalk(x, y));
         }
     }
-
+	
     // set tiles that static resources are on as unbuildable
     for (auto& resource : BWAPI::Broodwar->getStaticNeutralUnits())
     {
-        if (!resource->getType().isResourceContainer())
+        if (!resource->getType().isResourceContainer()) // Need to manage if it's a mineral field with low minerals that should be removed
         {
             continue;
         }
@@ -37,7 +41,13 @@ void SMapTools::onStart()
         {
             for (int y = tileY; y < tileY + resource->getType().tileHeight(); ++y)
             {
-                if (resource->getType().isMineralField()) { m_tileType.set(x, y, 'M'); }
+				b_miningField = false;
+				if (resource->getResources() > 100 && resource->getType().isMineralField())
+				{
+					b_miningField = true;
+				}
+                
+				if (resource->getType().isMineralField()) { m_tileType.set(x, y, 'M'); }
                 else { m_tileType.set(x, y, 'G'); }
 
                 m_buildable.set(x, y, false);
@@ -51,7 +61,10 @@ void SMapTools::onStart()
                         {
                             continue;
                         }
-
+						if (b_miningField)
+						{
+							m_depotSoonBuildable.set(x + rx, y + ry, 0);
+						}
                         m_depotBuildable.set(x + rx, y + ry, 0);
                     }
                 }
@@ -236,7 +249,8 @@ void SMapTools::getAllBasePositions()
 			continue;
 		}
 		//std::cout << "Mineral Group size now: " << g.size() << std::endl;
-		allBaseLocations.push_back(getBaseLocation(g));
+
+		m_bases.push_back(PossibleDepotInfo(g, BWAPI::Unitset(), getBaseLocation(g)));	//Need to add the things to remove
 	}
 }
 
@@ -244,9 +258,9 @@ void SMapTools::drawBases()
 {
 	BWAPI::UnitType base = BWAPI::UnitTypes::Zerg_Hatchery;
 
-	for (auto& pos : allBaseLocations)
+	for (auto& pos : m_bases)
 	{
-		BWAPI::Broodwar->drawBoxMap(BWAPI::Position(pos.x * 32, pos.y * 32), BWAPI::Position(pos.x * 32 + base.tileWidth() * 32, pos.y * 32 + base.tileHeight() * 32), BWAPI::Colors::Purple, false);
+		BWAPI::Broodwar->drawBoxMap(BWAPI::Position(pos.getBestTile().x * 32, pos.getBestTile().y * 32), BWAPI::Position(pos.getBestTile().x * 32 + base.tileWidth() * 32, pos.getBestTile().y * 32 + base.tileHeight() * 32), BWAPI::Colors::Purple, false);
 	}
 
 	for (auto& pos : CheckedSquares)
@@ -263,11 +277,19 @@ void SMapTools::drawBases()
 	}
 }
 
+void SMapTools::displayMinPositions()
+{
+	for (auto min : BWAPI::Broodwar->getStaticMinerals())
+	{
+		int group = min->getResourceGroup();	//Gives the "id" of the expansion, not the optimal base location
+		BWAPI::Broodwar->drawTextMap(min->getPosition(), "G: %d", group);
+	}
+}
+
+
 bool isWalkableBetween(BWAPI::Position a, BWAPI::Position b)
 {
 	return BWAPI::Broodwar->getRegionAt(a)->getRegionGroupID() == BWAPI::Broodwar->getRegionAt(b)->getRegionGroupID();
-	//BWAPI::WalkPosition()
-	//BWAPI::Broodwar->isWalkable()
 }
 
 bool isVisitedAndValid(std::map<BWAPI::TilePosition, bool>& visit, BWAPI::TilePosition place, int xChange, int yChange, BWAPI::TilePosition startedFrom)
@@ -284,17 +306,6 @@ bool isVisitedAndValid(std::map<BWAPI::TilePosition, bool>& visit, BWAPI::TilePo
 
 bool isDefault(BWAPI::TilePosition p)
 {
-	if (p.x == 0 && p.y == 0)
-		return true;
-	//std::cout << "Not Defaulted: " << p << std::endl;
-	return false;
+	return p.x == 0 && p.y == 0;
 }
 
-void SMapTools::displayMinPositions()
-{
-	for (auto min : BWAPI::Broodwar->getStaticMinerals())
-	{
-		int group = min->getResourceGroup();	//Gives the "id" of the expansion, not the optimal base location
-		BWAPI::Broodwar->drawTextMap(min->getPosition(), "G: %d", group);
-	}
-}

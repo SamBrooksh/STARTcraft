@@ -14,6 +14,10 @@ class PossibleDepotInfo {
 public:
     PossibleDepotInfo() : miningMinerals(), toRemove(), idealTile() {}
     PossibleDepotInfo(BWAPI::Unitset mins, BWAPI::Unitset rem, BWAPI::TilePosition t) : miningMinerals(mins), toRemove(rem), idealTile(t) {}
+
+    BWAPI::Unitset getResources();
+    BWAPI::Unitset getNeededRemoval();
+    BWAPI::TilePosition getBestTile();
 };
 
 class SMapTools {
@@ -27,6 +31,8 @@ class SMapTools {
     Grid<int> m_lastSeen;
     Grid<char> m_tileType;
     std::vector<PossibleDepotInfo> m_bases;
+    std::vector<BWAPI::TilePosition> CheckedSquares;
+
 
     bool canBuild(int tileX, int tileY) const;
     bool canWalk(int tileX, int tileY) const;
@@ -37,6 +43,8 @@ public:
     std::vector<PossibleDepotInfo> getAllIslandBases();
     std::vector<PossibleDepotInfo> getAllStartBlockedBases();
     std::vector<PossibleDepotInfo> getNonIslandBases();
+
+    std::vector<BWAPI::TilePosition> getBaseTilePositions();    //Just return the tiles
 
     bool    isValidTile(int tileX, int tileY) const;
     bool    isValidTile(const BWAPI::TilePosition& tile) const;
@@ -53,9 +61,9 @@ public:
     bool    isDepotBuildableTile(int tileX, int tileY) const;
     void    drawTile(int tileX, int tileY, const BWAPI::Color& color) const;
 
-    bool validBaseLocation(BWAPI::TilePosition p);
-    void displayMinPositions();
-    void drawBases();
-    void getAllBasePositions();
+    bool    validBaseLocation(BWAPI::TilePosition p);
+    void    displayMinPositions();
+    void    drawBases();
+    void    getAllBasePositions();
     BWAPI::TilePosition getBaseLocation(BWAPI::Unitset& resources);
 };

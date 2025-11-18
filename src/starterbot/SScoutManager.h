@@ -23,8 +23,6 @@ class SScoutManager
 	std::vector<BWAPI::TilePosition> ourBases;		//Probably should have an ally base as well
 	std::vector<BWAPI::TilePosition> allyBases;		//Probably should have an ally base as well	- this should be easier to update
 
-	std::vector<BWAPI::TilePosition> CheckedSquares;
-
 public:
 	void addSightedStructure(BWAPI::TilePosition, BWAPI::Unit, BWAPI::Player);	// Should be a pair probably
 	void updateSightedUnit(BWAPI::Position, BWAPI::Unit, BWAPI::Player);		// Add or update - to both the 
